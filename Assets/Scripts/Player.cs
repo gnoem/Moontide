@@ -9,8 +9,9 @@ public class Player : MonoBehaviour
     public float turnSpeed = 2;
     public float jumpForce = 5;
     private bool isGrounded;
-    public int isFacingForward = 1;
-    public int rotationOffset = 0;
+    public Vector3 direction = Vector3.forward; // 1 = forwards, -1 = backwards
+    private Vector3 prevDirection = Vector3.forward;
+    public bool isFacingForward => direction.z == 1;
     public Rigidbody rigidBody;
 
     private void OnCollisionEnter(Collision collision)
@@ -19,7 +20,6 @@ public class Player : MonoBehaviour
             isGrounded = true;
     }
 
-    // Update is called once per frame
     void Update()
     {
         HandleMovement();
@@ -33,11 +33,15 @@ public class Player : MonoBehaviour
 
         // are we walking forward or backward
         if (z != 0)
-            isFacingForward = (z > 0) ? 1 : -1;
-            rotationOffset = (isFacingForward == 1) ? 0 : 180;
+        {
+            prevDirection = direction;
+            direction = (z > 0) ? Vector3.forward : -Vector3.forward;
+        }
 
-        rigidBody.transform.Rotate(0, x * isFacingForward, 0);
-        Vector3 transformForward = isFacingForward == 1 ? transform.forward : -transform.forward;
+        int shouldSwivel = (prevDirection.z != direction.z) ? 180 : 0;
+        Vector3 transformForward = (isFacingForward) ? transform.forward : -transform.forward;
+        
+        rigidBody.transform.Rotate(0, (x + shouldSwivel) * direction.z, 0);
         rigidBody.velocity = transformForward * z;
     }
 
