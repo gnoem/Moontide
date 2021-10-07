@@ -8,8 +8,9 @@ public class Player : MonoBehaviour
     public float moveSpeed = 5;
     public float turnSpeed = 2;
     public float jumpForce = 5;
-    public float swivelSpeed = 60;
+    public float swivelSpeed = 10;
     private bool isGrounded;
+    public bool isWalking;
     public bool isSwivelling;
     private float startSwivel;
     private float amountSwivelled = 0;
@@ -38,6 +39,7 @@ public class Player : MonoBehaviour
         if (isSwivelling)
             return;
         
+        isWalking = false;
         isSwivelling = true;
         startSwivel = rigidBody.transform.eulerAngles.y;
         amountSwivelled = 0;
@@ -58,7 +60,11 @@ public class Player : MonoBehaviour
             // handle switching between walking forward & backward
             if (prevDirection.z != direction.z)
                 StartSwivel();
+            else if (!isSwivelling)
+                isWalking = true;
         }
+        else
+            isWalking = false;
 
         if (isSwivelling)
         {
