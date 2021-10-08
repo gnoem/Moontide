@@ -7,9 +7,7 @@ public class Player : MonoBehaviour
     // how fast do we want to move
     public float moveSpeed = 5;
     public float turnSpeed = 2;
-    public float jumpForce = 5;
     public float swivelSpeed = 10;
-    private bool isGrounded;
     public bool isWalking;
     public bool isSwivelling;
     private float startSwivel;
@@ -18,12 +16,12 @@ public class Player : MonoBehaviour
     private Vector3 direction;
     private Vector3 prevDirection;
     public bool isFacingForward => direction.z == 1;
-    public Rigidbody rigidBody;
-
-    private void OnCollisionEnter(Collision collision)
+    private Rigidbody rigidBody;
+    private CapsuleCollider capsuleCollider;
+    void Awake()
     {
-        if (collision.contacts[0].normal == Vector3.up)
-            isGrounded = true;
+        rigidBody = GetComponent<Rigidbody>();
+        capsuleCollider = GetComponent<CapsuleCollider>();
     }
     void Start()
     {
@@ -32,7 +30,6 @@ public class Player : MonoBehaviour
     void Update()
     {
         HandleMovement();
-        HandleJump();
     }
     private void StartSwivel()
     {
@@ -78,15 +75,6 @@ public class Player : MonoBehaviour
             Vector3 transformForward = (isFacingForward) ? transform.forward : -transform.forward;
             rigidBody.transform.Rotate(0, x * direction.z, 0);
             rigidBody.velocity = transformForward * z;
-        }
-    }
-
-    private void HandleJump()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            isGrounded = false;
-            rigidBody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
 }
