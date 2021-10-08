@@ -8,6 +8,9 @@ public class Player : MonoBehaviour
     public float moveSpeed = 5;
     public float turnSpeed = 2;
     public float swivelSpeed = 10;
+    public float slopeLimit = 45f;
+    private bool isGrounded;
+    private bool walkingIsPermitted;
     public bool isWalking;
     public bool isSwivelling;
     private float startSwivel;
@@ -29,7 +32,31 @@ public class Player : MonoBehaviour
     }
     void Update()
     {
-        HandleMovement();
+        CheckIfTooSteepToWalk();
+        if (walkingIsPermitted)
+        {
+            HandleMovement();
+        }
+    }
+    private void CheckIfTooSteepToWalk()
+    {
+        walkingIsPermitted = false;
+        float capsuleHeight = Mathf.Max(capsuleCollider.radius * 2f, capsuleCollider.height);
+        Vector3 capsuleBottom = transform.TransformPoint(capsuleCollider.center - Vector3.up * capsuleHeight / 2f);
+        float radius = transform.TransformVector(capsuleCollider.radius, 0f, 0f).magnitude;
+
+        Ray ray = new Ray(capsuleBottom + transform.up * .01f, -transform.up);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, radius * 5f))
+        {
+            float normalAngle = Vector3.Angle(hit.normal, transform.up);
+            if (normalAngle < slopeLimit)
+            {
+                float maxDist = radius / Mathf.Cos(Mathf.Deg2Rad * normalAngle) - radius + .02f;
+                if (hit.distance < maxDist)
+                    walkingIsPermitted = true;
+            }
+        }
     }
     private void StartSwivel()
     {
